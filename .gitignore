@@ -1,0 +1,15 @@
+# Credenciales locales: NUNCA se suben
+local.properties
+*.env
+
+# Compilación e IDE
+target/
+bin/
+.classpath
+.project
+.settings/
+.idea/
+*.iml
+.vscode/
+.factorypath
+.springBeans

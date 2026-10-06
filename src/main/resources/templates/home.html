@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ClubManager · Gestión de clubes de fútbol</title>
+  <meta name="description" content="Plataforma para gestionar clubes, entrenadores, jugadores, asociaciones y competiciones.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #0f172a; }
+    .hero { background: radial-gradient(circle at 80% 20%, #10b98133, transparent 45%), linear-gradient(135deg, #022c22 0%, #064e3b 55%, #0f172a 100%); }
+    .pitch { background: repeating-linear-gradient(90deg, #15803d 0 40px, #16a34a 40px 80px); border: 3px solid #ffffff80; border-radius: 16px; position: relative; aspect-ratio: 4/3; overflow: hidden; }
+    .pitch::before { content: ''; position: absolute; inset: 0 50% 0 0; border-right: 3px solid #ffffff80; }
+    .pitch::after { content: ''; position: absolute; width: 90px; height: 90px; border: 3px solid #ffffff80; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .glass { background: #ffffff14; border: 1px solid #ffffff26; backdrop-filter: blur(8px); }
+    .lift { transition: transform .2s, box-shadow .2s; }
+    .lift:hover { transform: translateY(-4px); box-shadow: 0 14px 30px #0f172a1f; }
+    .grad-text { background: linear-gradient(90deg, #6ee7b7, #fcd34d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  </style>
+</head>
+<body class="bg-white">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background:#022c22ee;backdrop-filter:blur(6px)">
+  <div class="container">
+    <a class="navbar-brand font-extrabold" href="#inicio">⚽ Club<span class="text-emerald-400">Manager</span></a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#menu"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="menu">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Gestión</a>
+          <ul class="dropdown-menu dropdown-menu-dark">
+            <li><a class="dropdown-item" href="/clubes">🏟️ Clubes</a></li><li><a class="dropdown-item" href="/entrenadores">🧑‍🏫 Entrenadores</a></li>
+            <li><a class="dropdown-item" href="/jugadores">👕 Jugadores</a></li><li><a class="dropdown-item" href="/asociaciones">🏛️ Asociaciones</a></li>
+            <li><a class="dropdown-item" href="/competiciones">🏆 Competiciones</a></li><li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/api/clubes" target="_blank">🔌 API REST</a></li></ul></li>
+        <li class="nav-item"><a class="nav-link" href="#funciones">Funciones</a></li>
+        <li class="nav-item"><a class="nav-link" href="#clubes">Clubes</a></li>
+        <li class="nav-item"><a class="nav-link" href="#tecnologia">Tecnología</a></li>
+        <li class="nav-item"><a class="btn btn-success btn-sm px-3 ms-lg-2" href="/clubes">Ir al panel →</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header id="inicio" class="hero text-white pt-32 pb-24">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="inline-block glass rounded-full px-3 py-1 text-sm mb-4">🏆 Temporada 2026 · Datos en la nube</span>
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Administra tu fútbol con <span class="grad-text">precisión profesional</span></h1>
+        <p class="text-lg text-emerald-100/90 mb-5">Clubes, entrenadores, planteles, asociaciones y competiciones en un solo panel. Una API REST sólida respaldada por MySQL en Clever Cloud.</p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/clubes" class="btn btn-warning btn-lg font-semibold px-4">Abrir el panel</a>
+          <a href="#clubes" class="btn btn-outline-light btn-lg px-4">Ver clubes</a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="pitch shadow-2xl">
+          <div class="absolute top-4 left-4 glass text-white rounded-lg px-3 py-2 text-sm"><b th:text="${nClubes}">–</b> clubes activos</div>
+          <div class="absolute bottom-4 right-4 glass text-white rounded-lg px-3 py-2 text-sm"><b th:text="${nJugadores}">–</b> jugadores registrados</div>
+          <div class="absolute inset-0 flex items-center justify-center text-7xl">⚽</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ESTADÍSTICAS -->
+<section class="container -mt-12 relative" style="z-index:2">
+  <div class="row g-3 text-center">
+    <div class="col-6 col-md-3"><div class="bg-white rounded-xl shadow-lg p-4 lift"><div class="text-4xl font-extrabold text-emerald-600" th:text="${nClubes}">0</div><div class="text-slate-500">Clubes</div></div></div>
+    <div class="col-6 col-md-3"><div class="bg-white rounded-xl shadow-lg p-4 lift"><div class="text-4xl font-extrabold text-sky-600" th:text="${nJugadores}">0</div><div class="text-slate-500">Jugadores</div></div></div>
+    <div class="col-6 col-md-3"><div class="bg-white rounded-xl shadow-lg p-4 lift"><div class="text-4xl font-extrabold text-amber-500" th:text="${nComps}">0</div><div class="text-slate-500">Competiciones</div></div></div>
+    <div class="col-6 col-md-3"><div class="bg-white rounded-xl shadow-lg p-4 lift"><div class="text-4xl font-extrabold text-rose-500" th:text="${nAsocs}">0</div><div class="text-slate-500">Asociaciones</div></div></div>
+  </div>
+</section>
+
+<!-- FUNCIONES -->
+<section id="funciones" class="container py-24">
+  <div class="text-center mb-5">
+    <p class="text-emerald-600 font-semibold uppercase tracking-wide text-sm mb-1">Funciones</p>
+    <h2 class="text-3xl md:text-4xl font-extrabold">Todo lo que tu club necesita</h2>
+  </div>
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-4"><div class="h-100 border rounded-xl p-4 lift"><div class="text-3xl mb-2">🏟️</div><h3 class="h5 font-bold">Gestión de clubes</h3><p class="text-slate-600 mb-0">Crea, edita y elimina clubes desde un panel claro y responsivo.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="h-100 border rounded-xl p-4 lift"><div class="text-3xl mb-2">🧑‍🏫</div><h3 class="h5 font-bold">Cuerpo técnico</h3><p class="text-slate-600 mb-0">Cada club tiene su entrenador: edad, nacionalidad y trayectoria a la vista.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="h-100 border rounded-xl p-4 lift"><div class="text-3xl mb-2">👕</div><h3 class="h5 font-bold">Plantel de jugadores</h3><p class="text-slate-600 mb-0">Dorsal, nombre y posición de cada jugador, con altas y bajas inmediatas.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="h-100 border rounded-xl p-4 lift"><div class="text-3xl mb-2">🏛️</div><h3 class="h5 font-bold">Asociaciones</h3><p class="text-slate-600 mb-0">Relaciona cada club con su federación, país y presidente.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="h-100 border rounded-xl p-4 lift"><div class="text-3xl mb-2">🏆</div><h3 class="h5 font-bold">Competiciones</h3><p class="text-slate-600 mb-0">Inscribe clubes en varios torneos, con premios y fechas de inicio y fin.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="h-100 border rounded-xl p-4 lift"><div class="text-3xl mb-2">🔌</div><h3 class="h5 font-bold">API REST</h3><p class="text-slate-600 mb-0">Endpoints JSON listos para integrar con cualquier aplicación.</p></div></div>
+  </div>
+</section>
+
+<!-- CLUBES -->
+<section id="clubes" class="bg-slate-50 py-24">
+  <div class="container">
+    <div class="text-center mb-5">
+      <p class="text-emerald-600 font-semibold uppercase tracking-wide text-sm mb-1">Clubes</p>
+      <h2 class="text-3xl md:text-4xl font-extrabold">Clubes registrados</h2>
+      <p class="text-slate-500">Datos leídos desde MySQL (Clever Cloud)</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4" th:each="c : ${clubes}">
+        <div class="bg-white rounded-xl shadow-sm border p-4 h-100 lift">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="h5 font-bold mb-0" th:text="${c.nombre()}"></h3>
+            <span class="badge text-bg-success" th:text="${c.jugadores() + ' jugadores'}"></span>
+          </div>
+          <p class="mb-1 text-slate-600" th:text="${'🏛️ ' + (c.asociacion() ?: 'Sin asociación')}"></p>
+          <p class="mb-3 text-slate-600" th:text="${'🧑‍🏫 ' + (c.entrenadorNombre() != null ? c.entrenadorNombre() + ' ' + c.entrenadorApellido() : 'Sin entrenador')}"></p>
+          <a th:href="@{|/clubes/${c.id()}|}" class="text-emerald-700 font-semibold no-underline">Ver detalle →</a>
+        </div>
+      </div>
+      <div class="col-12 text-center text-slate-400" th:if="${#lists.isEmpty(clubes)}">Aún no hay clubes registrados.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TECNOLOGÍA -->
+<section id="tecnologia" class="container py-24">
+  <div class="text-center mb-5">
+    <p class="text-emerald-600 font-semibold uppercase tracking-wide text-sm mb-1">Tecnología</p>
+    <h2 class="text-3xl md:text-4xl font-extrabold">Modelo de datos con JPA</h2>
+    <p class="text-slate-500">Spring Boot · Hibernate · MySQL en Clever Cloud · carga <code>LAZY</code> · <code>@OnDelete(CASCADE)</code></p>
+  </div>
+  <div class="overflow-x-auto bg-white rounded-xl shadow">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-dark"><tr><th>Relación</th><th>Anotación</th><th>Resultado en la base de datos</th></tr></thead>
+      <tbody>
+        <tr><td>Club ↔ Entrenador</td><td><code>@OneToOne</code></td><td>Columna <code>entrenador_id</code> en <code>clubes</code></td></tr>
+        <tr><td>Club → Jugadores</td><td><code>@OneToMany</code> + <code>@JoinColumn</code></td><td>Columna <code>id_club</code> en <code>jugadores</code> (sin tabla intermedia)</td></tr>
+        <tr><td>Club → Asociación</td><td><code>@ManyToOne</code></td><td>Columna <code>asociacion_id</code> en <code>clubes</code></td></tr>
+        <tr><td>Club ↔ Competiciones</td><td><code>@ManyToMany</code></td><td>Tabla <code>clubes_competiciones</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="hero text-white py-20 text-center">
+  <div class="container">
+    <h2 class="text-3xl md:text-4xl font-extrabold mb-3">¿Listo para salir a la cancha?</h2>
+    <p class="text-emerald-100/90 mb-4">Entra al panel y gestiona tus clubes ahora mismo.</p>
+    <a href="/clubes" class="btn btn-warning btn-lg font-semibold px-5">Ir al panel de control</a>
+  </div>
+</section>
+
+<footer class="bg-slate-900 text-slate-400 py-4">
+  <div class="container flex flex-wrap justify-between gap-2 text-sm">
+    <span>⚽ ClubManager · Spring Boot + MySQL (Clever Cloud)</span>
+    <span><a class="text-slate-400" href="/api/clubes">API /api/clubes</a> · <a class="text-slate-400" href="/clubes">Panel</a></span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
